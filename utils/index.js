@@ -1,14 +1,32 @@
-const fs = require("fs");
+// fs.readFile NO USAR Sync (bloqueante)
+// Promise.All
+const {
+  promises: { readFile, writeFile },
+} = require("fs");
 const path = require("path");
 
-const readOneFile = () => {
+const readFiles = () => {
   const newPath = path.join(__dirname, "../");
-  fs.readFileSync(`${newPath}/alumnos/alumnos1.json`, (error, data) => {
-    if (error) {
-      throw new Error("Error in read file");
-    }
-    const student = JSON.parse(data);
-    console.log(student);
-  });
+  const promiseArray = [];
+  for (let i = 1; i <= 5; i++) {
+    promiseArray.push(readFile(`${newPath}/alumnos/alumno${i}.json`));
+  }
+  return promiseArray;
 };
-module.exports = { readOneFile };
+
+const writeFiles = (listado) => {
+  writeFile("listado.txt", listado)
+    .then((data) => {
+      console.log("File written successfully\n");
+      console.log("The written has the following contents:");
+      console.log(
+        readFile("listado.txt").then((data) => console.log(data.toString()))
+      );
+    })
+    .catch((error) => {
+      console.error(error.message);
+      process.exit(1);
+    });
+};
+
+module.exports = { readFiles, writeFiles };
